@@ -4,18 +4,24 @@
 
 from imgpy import Img
 
+# format image to take right side of gif, and simplify colors
 def formatImage(gifname,fname):
     with Img(fp=gifname) as im:
         im.crop(box=(im.width / 2, 0, im.width, im.height))
+        
+        colors = sorted(im.frames[0].getcolors())
         for frame in im.frames:
             for x in range(im.width):
                 for y in range(im.height):
-                    if frame.getpixel((x,y))==48:
-                        frame.putpixel((x,y),32)
-                    if frame.getpixel((x,y))!=32 and frame.getpixel((x,y))!=60:
-                        frame.putpixel((x,y),6)                        
+                    if frame.getpixel((x,y))==colors[0][1]:
+                        frame.putpixel((x,y),colors[1][1])
+                    if frame.getpixel((x,y))!=colors[1][1] and frame.getpixel((x,y))!=colors[2][1]:
+                        frame.putpixel((x,y),colors[-1][1])                        
         im.save(fp=fname)
 
+# Iterate each frame and use bfs to eliminate one cell at a time.
+# The number of cells will be the number of isolated shapes in the frame
+# with a gray area greater than about 40
 def start(fname, output):
     file = open(output,"w")
     with Img(fp=fname) as im:
@@ -43,12 +49,9 @@ def start(fname, output):
     file.close()
 
 
-gifname = '/Users/meta2/Desktop/bacteria-animation.gif' # original gif
-fname = '/Users/meta2/Desktop/crop.gif'
+gifname = 'bacteria-animation.gif' # original gif
+fname = 'crop.gif'
 output = 'output.txt'
 
 formatImage(gifname,fname)   
 start(fname, output)         
-
-# dfs on cells until meet source point, check cell area if bigger than 40 pixels
-    # black : 0, red : 1, gray : 2
